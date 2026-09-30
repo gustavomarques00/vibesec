@@ -155,6 +155,27 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/infra/**/*.ts'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message:
+            'External infra must use pinned http(s) connectors, not global fetch.',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.name='fetch'], CallExpression[callee.property.name='fetch']",
+          message: 'External infra must use pinned http(s) connectors, not fetch.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
