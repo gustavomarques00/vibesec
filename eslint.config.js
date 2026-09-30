@@ -69,6 +69,51 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/domain/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:net',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:http',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:https',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:tls',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External domain cannot import External infrastructure.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External domain cannot access the network.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
