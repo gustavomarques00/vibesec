@@ -1,0 +1,68 @@
+{
+  "name": "vibesec",
+  "version": "1.0.0",
+  "description": "Local-first offline security analysis CLI for vibe-coded JavaScript/TypeScript applications",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "vibesec": "./dist/cli/main.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run format:check",
+    "pack:check": "npm pack --dry-run"
+  },
+  "keywords": [
+    "appsec",
+    "sast",
+    "security",
+    "cli",
+    "offline",
+    "static-analysis",
+    "secrets",
+    "supabase",
+    "javascript",
+    "typescript"
+  ],
+  "author": "VibeSec contributors",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gustavomarques00/vibesec.git"
+  },
+  "homepage": "https://github.com/gustavomarques00/vibesec#readme",
+  "bugs": {
+    "url": "https://github.com/gustavomarques00/vibesec/issues"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.11"
+  }
+}
