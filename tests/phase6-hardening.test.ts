@@ -207,6 +207,12 @@ describe('Phase 6 determinism and package readiness', () => {
   })
 
   it('exposes a shebang on the CLI entry and packs README', async () => {
+    const built = spawnSync('npm', ['run', 'build'], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      shell: true,
+    })
+    expect(built.status).toBe(0)
     const packed = spawnSync('npm', ['pack', '--dry-run'], {
       cwd: process.cwd(),
       encoding: 'utf8',
