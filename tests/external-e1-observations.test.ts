@@ -139,10 +139,21 @@ describe('External E1.4 cookie attribute extraction', () => {
       { name: 'Set-Cookie', value: '' },
     ])
     const plain = cookies.find((c) => c.name === 'plain')
-    expect(plain?.sameSite).toBe('unknown')
+    expect(plain?.sameSite).toBe('absent')
     expect(plain?.httpOnly).toBe(true)
     expect(plain?.secure).toBe(false)
     expect(plain?.expiresAtIso).toBe('2015-10-21T07:28:00.000Z')
+    assertNoCanaries(cookies, [CANARY_A])
+  })
+
+  it('marks unrecognized SameSite values as unknown, not absent', () => {
+    const cookies = extractCookieAttributeObservations([
+      {
+        name: 'Set-Cookie',
+        value: `weird=${CANARY_A}; SameSite=InvalidToken; Secure`,
+      },
+    ])
+    expect(cookies[0]?.sameSite).toBe('unknown')
     assertNoCanaries(cookies, [CANARY_A])
   })
 

@@ -324,7 +324,7 @@ describe('External E1.6 cookie rules', () => {
                 name: 'session',
                 secure: false,
                 httpOnly: false,
-                sameSite: 'unknown' as const,
+                sameSite: 'absent' as const,
                 path: '/',
                 hostPrefix: false,
                 securePrefix: false,
@@ -354,6 +354,41 @@ describe('External E1.6 cookie rules', () => {
     expect(serialized).not.toContain(CANARY_B)
     expect(serialized).not.toContain(CANARY_C)
     expect(serialized).not.toMatch(/cookieValue|rawSetCookie/i)
+  })
+
+  it('does not emit VS-EXT-007 when SameSite state is unknown', () => {
+    const findings = evaluateExternalRules(
+      graph({
+        initialRequestUrl: 'https://example.com/',
+        finalUrl: 'https://example.com/',
+        responses: [
+          documentResponse({
+            url: 'https://example.com/',
+            scheme: 'https',
+            securityHeaders: allHeaders({
+              'strict-transport-security': ['max-age=1'],
+              'content-security-policy': 'OBSERVED',
+              'x-content-type-options': ['nosniff'],
+              'referrer-policy': 'OBSERVED',
+            }),
+            hsts: { status: 'OBSERVED', maxAgeSeconds: 1 },
+            tls: { authorized: true },
+            cookies: Object.freeze([
+              Object.freeze({
+                name: 'weird',
+                secure: true,
+                httpOnly: true,
+                sameSite: 'unknown' as const,
+                hostPrefix: false,
+                securePrefix: false,
+              }),
+            ]),
+          }),
+        ],
+      }),
+      { evaluationTimeMs: FIXED_TIME },
+    )
+    expect(ruleIds(findings)).not.toContain('VS-EXT-007')
   })
 })
 
@@ -519,7 +554,7 @@ describe('External E1.6 determinism and architecture', () => {
               name: 'a',
               secure: true,
               httpOnly: false,
-              sameSite: 'unknown' as const,
+              sameSite: 'absent' as const,
               hostPrefix: false,
               securePrefix: false,
             }),

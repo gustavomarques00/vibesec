@@ -10,7 +10,7 @@ export const vsExt007: ExternalRule = Object.freeze({
     defaultSeverity: 'low',
     evidenceKind: 'cookie-attr',
     description:
-      'Emits when SameSite is absent, or SameSite=None is set without Secure.',
+      'Emits when SameSite is absent, or SameSite=None is set without Secure. Does not emit when SameSite state is unknown/unrecognized.',
   }),
   evaluate(graph) {
     const document = selectDocumentResponse(graph)
@@ -20,7 +20,9 @@ export const vsExt007: ExternalRule = Object.freeze({
     for (const cookie of document.cookies) {
       if (cookie.malformed === true) continue
 
-      const missingSameSite = cookie.sameSite === 'unknown'
+      // `absent` = attribute missing on an observed cookie.
+      // `unknown` = attribute present but unrecognized — not a missing finding.
+      const missingSameSite = cookie.sameSite === 'absent'
       const noneWithoutSecure = cookie.sameSite === 'None' && !cookie.secure
       if (!missingSameSite && !noneWithoutSecure) continue
 

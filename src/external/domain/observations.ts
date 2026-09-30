@@ -55,7 +55,15 @@ export type ExternalHstsObservation = Readonly<{
   malformed?: boolean
 }>
 
-export type ExternalCookieSameSite = 'Strict' | 'Lax' | 'None' | 'unknown'
+/**
+ * Cookie SameSite fact:
+ * - Strict / Lax / None: recognized attribute value
+ * - absent: Set-Cookie observed and SameSite attribute was not present
+ * - unknown: SameSite attribute present but value was not recognized
+ *
+ * Rules must not treat `unknown` as "missing".
+ */
+export type ExternalCookieSameSite = 'Strict' | 'Lax' | 'None' | 'absent' | 'unknown'
 
 /**
  * Cookie attribute observation. Deliberately has no `value` field.

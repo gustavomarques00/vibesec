@@ -62,7 +62,8 @@ function parseSetCookieLine(
 
   let secure = false
   let httpOnly = false
-  let sameSite: ExternalCookieSameSite = 'unknown'
+  /** Default: attribute not present on an otherwise observed cookie. */
+  let sameSite: ExternalCookieSameSite = 'absent'
   let domain: string | undefined
   let path: string | undefined
   let maxAgeSeconds: number | undefined

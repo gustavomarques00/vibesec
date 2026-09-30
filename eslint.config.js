@@ -322,6 +322,72 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/reporters/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External reporters cannot perform DNS.',
+            },
+            {
+              name: 'node:net',
+              message: 'External reporters cannot open sockets.',
+            },
+            {
+              name: 'node:http',
+              message: 'External reporters cannot perform HTTP.',
+            },
+            {
+              name: 'node:https',
+              message: 'External reporters cannot perform HTTPS.',
+            },
+            {
+              name: 'node:tls',
+              message: 'External reporters cannot use TLS I/O.',
+            },
+            {
+              name: 'node:fs',
+              message: 'External reporters cannot access the filesystem.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External reporters cannot import transport infrastructure.',
+            },
+            {
+              group: ['**/external/orchestration/**'],
+              message: 'External reporters cannot import orchestration.',
+            },
+            {
+              group: ['**/external/rules/**'],
+              allowTypeImports: true,
+              message:
+                'External reporters may import rule types only; no rule evaluation.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External reporters cannot access the network.',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportExpression',
+          message: 'External reporters cannot use dynamic imports.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
