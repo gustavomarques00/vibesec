@@ -1,6 +1,6 @@
 {
   "name": "vibesec",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Local-first security analysis CLI for JavaScript/TypeScript applications and public web surfaces",
   "type": "module",
   "main": "./dist/index.js",

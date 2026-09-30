@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.1.1 — 2026-09-30
+
+### Fixed
+
+- Stabilized the package-readiness test under slower CI environments
+  without changing scanner runtime behavior.
+
 ## 1.1.0 — 2026-09-30
 
 VibeSec Code MVP plus External E1: passive, bounded public-surface analysis.
