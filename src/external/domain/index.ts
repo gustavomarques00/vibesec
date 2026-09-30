@@ -22,13 +22,19 @@ export type {
 export { createEmptyExternalObservationGraph } from './observations.js'
 export type {
   ExternalAssetObservation,
+  ExternalBlockedRedirectObservation,
+  ExternalBlockedRedirectReason,
   ExternalCookieAttributeObservation,
   ExternalCookieSameSite,
+  ExternalFactStatus,
   ExternalHeaderObservation,
+  ExternalHstsObservation,
   ExternalHttpMethod,
   ExternalHttpResponseObservation,
   ExternalObservationGraph,
   ExternalRedirectObservation,
+  ExternalSecurityHeaderId,
+  ExternalSecurityHeaderObservation,
   ExternalTlsObservation,
 } from './observations.js'
 

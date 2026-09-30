@@ -229,6 +229,7 @@ describe('External E1.1 DTO sensitive-data boundary', () => {
     const graph = createEmptyExternalObservationGraph('https://example.com/')
     expect(graph.initialRequestUrl).toBe('https://example.com/')
     expect(graph.redirects).toEqual([])
+    expect(graph.blockedRedirects).toEqual([])
     expect(graph.responses).toEqual([])
     expect(graph.assets).toEqual([])
     expect(Object.isFrozen(graph)).toBe(true)

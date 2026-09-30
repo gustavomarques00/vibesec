@@ -176,6 +176,60 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/extractors/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External extractors cannot perform DNS (E1.4).',
+            },
+            {
+              name: 'node:net',
+              message: 'External extractors cannot open sockets (E1.4).',
+            },
+            {
+              name: 'node:http',
+              message: 'External extractors cannot perform HTTP (E1.4).',
+            },
+            {
+              name: 'node:https',
+              message: 'External extractors cannot perform HTTPS (E1.4).',
+            },
+            {
+              name: 'node:tls',
+              message: 'External extractors cannot use TLS I/O (E1.4).',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message:
+                'External extractors consume bounded DTOs; they cannot import infra.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External extractors cannot access the network.',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.name='fetch'], CallExpression[callee.property.name='fetch'], CallExpression[callee.name='connect'], CallExpression[callee.name='request']",
+          message: 'External extractors cannot perform network I/O.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
