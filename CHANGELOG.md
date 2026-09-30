@@ -2,6 +2,40 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.1.0 — 2026-09-30
+
+VibeSec Code MVP plus External E1: passive, bounded public-surface analysis.
+
+### Added
+
+- `vibesec external <target>` CLI alongside offline `vibesec scan <path>`
+- Secure External transport (SSRF classification, DNS validation, address
+  pinning, post-connect verification, manual redirects, budgets, TLS verify)
+- Response observation extraction (headers, cookies attributes, TLS, redirects)
+- Bounded same-origin script/stylesheet asset inventory (no map fetch, no crawl)
+- External rules `VS-EXT-001` … `VS-EXT-011`
+- External reporters: terminal, JSON (`schemaVersion: "ext-1"`), Markdown
+- Exit codes for External: `0` / `1` / `2` (same contract as Code)
+
+### Security
+
+- Fail-closed private/loopback/link-local/special destination handling
+- Mixed public/private DNS answers denied; rebinding mitigated via pin set
+- HTTPS→HTTP downgrade blocked; asset redirects cannot leave document origin
+- Cookie values and raw remote bodies excluded from graphs/findings/reports
+- Code scanner remains offline; External network capability is isolated
+- Adversarial hardening coverage for parser, SSRF, budgets, and reporters
+
+### Fixed
+
+- Multi-hop same-origin→off-origin asset redirect request-budget under-count
+- Cookie SameSite `absent` vs `unknown` semantics for `VS-EXT-007`
+
+### Changed
+
+- Package version `1.1.0`
+- README documents Code and External modes, limitations, and responsible use
+
 ## 1.0.0 — 2026-09-30
 
 Initial public release of the VibeSec local-first security analysis CLI.
