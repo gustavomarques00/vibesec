@@ -114,6 +114,47 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/policy/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External policy cannot perform DNS (E1.2).',
+            },
+            {
+              name: 'node:http',
+              message: 'External policy cannot perform HTTP (E1.2).',
+            },
+            {
+              name: 'node:https',
+              message: 'External policy cannot perform HTTPS (E1.2).',
+            },
+            {
+              name: 'node:tls',
+              message: 'External policy cannot use TLS I/O (E1.2).',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External policy cannot import External infrastructure.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External policy cannot access the network.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
