@@ -69,6 +69,325 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/domain/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:net',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:http',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:https',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+            {
+              name: 'node:tls',
+              message: 'External domain must remain network-free (E1.1).',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External domain cannot import External infrastructure.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External domain cannot access the network.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/external/policy/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External policy cannot perform DNS (E1.2).',
+            },
+            {
+              name: 'node:http',
+              message: 'External policy cannot perform HTTP (E1.2).',
+            },
+            {
+              name: 'node:https',
+              message: 'External policy cannot perform HTTPS (E1.2).',
+            },
+            {
+              name: 'node:tls',
+              message: 'External policy cannot use TLS I/O (E1.2).',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External policy cannot import External infrastructure.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External policy cannot access the network.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/external/infra/**/*.ts'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message:
+            'External infra must use pinned http(s) connectors, not global fetch.',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.name='fetch'], CallExpression[callee.property.name='fetch']",
+          message: 'External infra must use pinned http(s) connectors, not fetch.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/external/extractors/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External extractors cannot perform DNS (E1.4).',
+            },
+            {
+              name: 'node:net',
+              message: 'External extractors cannot open sockets (E1.4).',
+            },
+            {
+              name: 'node:http',
+              message: 'External extractors cannot perform HTTP (E1.4).',
+            },
+            {
+              name: 'node:https',
+              message: 'External extractors cannot perform HTTPS (E1.4).',
+            },
+            {
+              name: 'node:tls',
+              message: 'External extractors cannot use TLS I/O (E1.4).',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message:
+                'External extractors consume bounded DTOs; they cannot import infra.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External extractors cannot access the network.',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.name='fetch'], CallExpression[callee.property.name='fetch'], CallExpression[callee.name='connect'], CallExpression[callee.name='request']",
+          message: 'External extractors cannot perform network I/O.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/external/orchestration/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'Orchestration must use OutboundHttpCapability, not dns.',
+            },
+            {
+              name: 'node:net',
+              message: 'Orchestration must use OutboundHttpCapability, not net.',
+            },
+            {
+              name: 'node:http',
+              message: 'Orchestration must use OutboundHttpCapability, not http.',
+            },
+            {
+              name: 'node:https',
+              message: 'Orchestration must use OutboundHttpCapability, not https.',
+            },
+            {
+              name: 'node:tls',
+              message: 'Orchestration must use OutboundHttpCapability, not tls.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'Orchestration must use OutboundHttpCapability, not fetch.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/external/rules/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External rules cannot perform DNS.',
+            },
+            {
+              name: 'node:net',
+              message: 'External rules cannot open sockets.',
+            },
+            {
+              name: 'node:http',
+              message: 'External rules cannot perform HTTP.',
+            },
+            {
+              name: 'node:https',
+              message: 'External rules cannot perform HTTPS.',
+            },
+            {
+              name: 'node:tls',
+              message: 'External rules cannot use TLS I/O.',
+            },
+            {
+              name: 'node:fs',
+              message: 'External rules cannot access the filesystem.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External rules cannot import transport infrastructure.',
+            },
+            {
+              group: ['**/external/orchestration/**'],
+              message: 'External rules cannot import orchestration.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External rules cannot access the network.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/external/reporters/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External reporters cannot perform DNS.',
+            },
+            {
+              name: 'node:net',
+              message: 'External reporters cannot open sockets.',
+            },
+            {
+              name: 'node:http',
+              message: 'External reporters cannot perform HTTP.',
+            },
+            {
+              name: 'node:https',
+              message: 'External reporters cannot perform HTTPS.',
+            },
+            {
+              name: 'node:tls',
+              message: 'External reporters cannot use TLS I/O.',
+            },
+            {
+              name: 'node:fs',
+              message: 'External reporters cannot access the filesystem.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External reporters cannot import transport infrastructure.',
+            },
+            {
+              group: ['**/external/orchestration/**'],
+              message: 'External reporters cannot import orchestration.',
+            },
+            {
+              group: ['**/external/rules/**'],
+              allowTypeImports: true,
+              message:
+                'External reporters may import rule types only; no rule evaluation.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External reporters cannot access the network.',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportExpression',
+          message: 'External reporters cannot use dynamic imports.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },

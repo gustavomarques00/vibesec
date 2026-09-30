@@ -1,7 +1,7 @@
 {
   "name": "vibesec",
-  "version": "1.0.0",
-  "description": "Local-first offline security analysis CLI for vibe-coded JavaScript/TypeScript applications",
+  "version": "1.1.1",
+  "description": "Local-first security analysis CLI for JavaScript/TypeScript applications and public web surfaces",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -44,7 +44,10 @@
     "secrets",
     "supabase",
     "javascript",
-    "typescript"
+    "typescript",
+    "external-scan",
+    "headers",
+    "tls"
   ],
   "author": "VibeSec contributors",
   "license": "Apache-2.0",

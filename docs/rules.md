@@ -1,13 +1,15 @@
-# VibeSec rule catalog (v1.0.0)
+# VibeSec rule catalog
 
-Source of truth: rule `metadata` and evaluate status in `src/rules/*`.
-Only rules registered in the local scan pipeline are listed.
+Source of truth:
 
-Finding **status** describes evidence strength for the claimed local repository
-condition — not production exploit confirmation. See `docs/finding-semantics.md`.
+- Code: rule `metadata` in `src/rules/*` (local scan pipeline)
+- External: rule `metadata` in `src/external/rules/*` (`VS-EXT-001` … `VS-EXT-011`)
 
-Default severity comes from rule metadata; some rules raise severity when Git
-tracking is `tracked`.
+Finding **status** describes evidence strength for the claimed condition — not
+production exploit confirmation. See `docs/finding-semantics.md`.
+
+Default severity comes from rule metadata; some Code rules raise severity when
+Git tracking is `tracked`.
 
 ## Secrets — `VS-SEC-*`
 
@@ -56,11 +58,31 @@ tracking is `tracked`.
 | `VS-DANG-003` | Dynamic shell or child_process execution         | high             | suspicious     | Reports dynamic shell / `child_process` execution patterns (heuristic). |
 | `VS-DANG-004` | Raw SQL with dynamic interpolation               | high             | suspicious     | Reports raw SQL constructed with dynamic interpolation (heuristic).     |
 
+## External — `VS-EXT-*`
+
+Passive External E1 rules. Evaluated only by `vibesec external` against an
+observation graph (no network inside rules).
+
+| ID           | Title                                                               | Default severity | Purpose                                                                                        |
+| ------------ | ------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| `VS-EXT-001` | Final document URL is not HTTPS                                     | medium           | Final effective document URL uses `http:`.                                                     |
+| `VS-EXT-002` | HTTPS to HTTP redirect downgrade blocked                            | medium           | HTTPS response attempted a redirect to HTTP (transport blocked the hop).                       |
+| `VS-EXT-003` | Strict-Transport-Security header was not observed                   | low              | HTTPS document response with HSTS status MISSING (not UNKNOWN).                                |
+| `VS-EXT-004` | Content-Security-Policy header was not observed                     | medium           | Document response with CSP status MISSING (presence only; no policy strength scoring).         |
+| `VS-EXT-005` | X-Content-Type-Options is missing or not nosniff                    | low              | Document XCTO missing or observed value is not `nosniff`.                                      |
+| `VS-EXT-006` | Cookie lacks Secure and/or HttpOnly attributes                      | medium           | Observed cookie attributes incomplete (values never retained).                                 |
+| `VS-EXT-007` | Cookie SameSite attribute is absent or SameSite=None without Secure | low              | SameSite absent, or None without Secure; unrecognized SameSite is `unknown` and does not fire. |
+| `VS-EXT-008` | TLS certificate validity period has ended                           | high             | Known certificate `validTo` is earlier than injected evaluation time.                          |
+| `VS-EXT-009` | TLS hostname verification failure observed                          | high             | Explicit hostname-attributable TLS authorization failure only (not all TLS failures).          |
+| `VS-EXT-010` | Public source map reference advertised on first-party asset         | medium           | Public `sourceMappingURL` reference on a fetched same-origin asset (map file is not fetched).  |
+| `VS-EXT-011` | Referrer-Policy header was not observed                             | low              | Document Referrer-Policy status MISSING (not UNKNOWN).                                         |
+
 ## Notes
 
-- Analysis of JS/TS/SQL for several families is **heuristic**; false positives and
-  false negatives are expected.
-- `requires_authorization` findings need operator-owned validation; VibeSec does
-  not contact production infrastructure.
-- Rule **versions** (e.g. `VS-SEC-001` at `1.1.0`) are independent of the npm
-  package version (`1.0.0`).
+- Analysis of JS/TS/SQL for several Code families is **heuristic**; false
+  positives and false negatives are expected.
+- `requires_authorization` findings need operator-owned validation; VibeSec Code
+  does not contact production infrastructure.
+- External UNKNOWN facts must not be treated as MISSING.
+- Rule **versions** inside metadata are independent of the npm package version
+  (`1.1.0`).

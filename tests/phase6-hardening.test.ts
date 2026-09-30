@@ -206,6 +206,8 @@ describe('Phase 6 determinism and package readiness', () => {
     )
   })
 
+  // npm run build + npm pack routinely needs 3–4s locally and exceeded Vitest's
+  // default 5s under GitHub Actions (CI attempts timed out at ~5084ms / ~5479ms).
   it('exposes a shebang on the CLI entry and packs README', async () => {
     const built = spawnSync('npm', ['run', 'build'], {
       cwd: process.cwd(),
@@ -227,7 +229,7 @@ describe('Phase 6 determinism and package readiness', () => {
       'utf8',
     )
     expect(main.startsWith('#!/usr/bin/env node')).toBe(true)
-  })
+  }, 20_000)
 })
 
 async function temporaryDirectory(): Promise<string> {

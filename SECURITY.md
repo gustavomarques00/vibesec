@@ -2,12 +2,13 @@
 
 ## Supported versions
 
-| Version | Supported |
-| ------- | --------- |
-| 1.0.x   | Yes       |
+| Version | Supported                          |
+| ------- | ---------------------------------- |
+| 1.1.x   | Yes                                |
+| 1.0.x   | Yes (security fixes while current) |
 
-Only the latest published 1.0.x line is in scope for security fixes until a
-newer minor/major is announced.
+Security fixes target the latest published 1.1.x line. 1.0.x remains documented
+for historical installs until maintainers announce otherwise.
 
 ## What to report
 
@@ -30,10 +31,10 @@ the tool.
 
 ### B) Findings VibeSec reports in scanned projects
 
-Findings produced by `vibesec scan` against a third-party or your own project
-are **not** vulnerabilities in VibeSec. They are repository evidence about the
-scanned target. Do not open security advisories against VibeSec solely because
-a scan reported `VS-*` findings in another codebase.
+Findings produced by `vibesec scan` or `vibesec external` against a third-party
+or your own target are **not** vulnerabilities in VibeSec. They are evidence
+about the scanned target. Do not open security advisories against VibeSec solely
+because a scan reported `VS-*` findings in another codebase.
 
 If you believe a detector is wrong in a way that creates a security problem
 _for VibeSec users_ (for example, a false negative that systematically misses
@@ -66,7 +67,9 @@ in reports or attachments. Use synthetic canaries.
 
 ## Scope limitations
 
-VibeSec is a local, offline, heuristic static analyzer. It does not claim:
+VibeSec Code is a local, offline, heuristic static analyzer. VibeSec External is
+a passive, bounded public-surface analyzer that performs HTTP(S) requests to an
+authorized target. Neither mode claims:
 
 - complete vulnerability detection;
 - equivalence to a penetration test;
@@ -74,5 +77,6 @@ VibeSec is a local, offline, heuristic static analyzer. It does not claim:
 - validation of credentials against remote services;
 - confirmation of production exploitability.
 
-Resource budgets, Git provenance degradation, and heuristic detectors are
-documented in `README.md`, `docs/threat-model.md`, and `docs/rules.md`.
+Resource budgets, Git provenance degradation, External SSRF/pinning bounds, and
+heuristic detectors are documented in `README.md`, `docs/threat-model.md`, and
+`docs/rules.md`.
