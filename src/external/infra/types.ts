@@ -3,7 +3,7 @@ import type {
   ExternalHttpMethod,
   ExternalRedirectObservation,
 } from '../domain/observations.js'
-import type { NormalizedExternalTarget } from '../domain/target.js'
+import type { ExternalOrigin, NormalizedExternalTarget } from '../domain/target.js'
 
 export type ExternalRequestPlan = Readonly<{
   /** Absolute http(s) URL or bare host accepted by normalizeExternalTarget. */
@@ -15,6 +15,16 @@ export type ExternalRequestContext = Readonly<{
   budgets: ExternalScanBudgets
   /** Optional external abort; overall deadline still applies. */
   signal?: AbortSignal
+  /**
+   * Caps requests for this invocation (scan-global remaining).
+   * Effective limit = min(budgets.maxRequests, maxRequestsOverride).
+   */
+  maxRequestsOverride?: number
+  /**
+   * When set, every redirect target must remain same-origin with this origin.
+   * Used by E1.5 asset acquisition.
+   */
+  sameOriginRedirects?: ExternalOrigin
 }>
 
 export type ExternalRawHeader = Readonly<{
@@ -49,6 +59,8 @@ export type ExternalRawObservation = Readonly<{
   method: ExternalHttpMethod
   hops: readonly ExternalRawHopObservation[]
   redirects: readonly ExternalRedirectObservation[]
+  /** Connection attempts consumed by this request chain. */
+  requestsConsumed: number
 }>
 
 export type OutboundHttpCapability = Readonly<{

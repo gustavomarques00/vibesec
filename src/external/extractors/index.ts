@@ -33,3 +33,13 @@ export type {
   ExternalTransportHopSource,
   ExternalTransportObservationInput,
 } from './graph.js'
+
+export { extractAssetReferences, isHtmlContentType } from './html-assets.js'
+export type {
+  HtmlAssetExtractionResult,
+  HtmlAssetKind,
+  HtmlAssetReferenceCandidate,
+} from './html-assets.js'
+
+export { extractSourceMapObservation } from './source-map.js'
+export type { SourceMapObservation } from './source-map.js'

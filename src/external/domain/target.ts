@@ -111,6 +111,27 @@ export function toExternalOrigin(target: NormalizedExternalTarget): ExternalOrig
   })
 }
 
+/**
+ * Same-origin for External E1: scheme + hostname + effective port.
+ * Sibling subdomains are NOT same-origin.
+ */
+export function isSameExternalOrigin(
+  left: ExternalOrigin,
+  right: ExternalOrigin,
+): boolean {
+  return (
+    left.scheme === right.scheme &&
+    left.hostname === right.hostname &&
+    left.port === right.port
+  )
+}
+
+export function originFromNormalizedTarget(
+  target: NormalizedExternalTarget,
+): ExternalOrigin {
+  return toExternalOrigin(target)
+}
+
 function ensureScheme(trimmed: string): string {
   if (!HAS_SCHEME.test(trimmed)) {
     // Bare host / host+path without scheme → HTTPS only (never invent HTTP).

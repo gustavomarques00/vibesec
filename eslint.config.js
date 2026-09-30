@@ -230,6 +230,45 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/orchestration/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'Orchestration must use OutboundHttpCapability, not dns.',
+            },
+            {
+              name: 'node:net',
+              message: 'Orchestration must use OutboundHttpCapability, not net.',
+            },
+            {
+              name: 'node:http',
+              message: 'Orchestration must use OutboundHttpCapability, not http.',
+            },
+            {
+              name: 'node:https',
+              message: 'Orchestration must use OutboundHttpCapability, not https.',
+            },
+            {
+              name: 'node:tls',
+              message: 'Orchestration must use OutboundHttpCapability, not tls.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'Orchestration must use OutboundHttpCapability, not fetch.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },

@@ -22,6 +22,7 @@ export type {
 export { createEmptyExternalObservationGraph } from './observations.js'
 export type {
   ExternalAssetObservation,
+  ExternalAssetSkipReason,
   ExternalBlockedRedirectObservation,
   ExternalBlockedRedirectReason,
   ExternalCookieAttributeObservation,
@@ -40,7 +41,11 @@ export type {
 
 export { compareExternalStrings, sortExternalStrings } from './ordering.js'
 
-export { normalizeExternalTarget, toExternalOrigin } from './target.js'
+export {
+  normalizeExternalTarget,
+  toExternalOrigin,
+  isSameExternalOrigin,
+} from './target.js'
 export type {
   ExternalOrigin,
   ExternalScheme,

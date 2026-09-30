@@ -9,7 +9,9 @@ import type {
   ExternalRedirectObservation,
 } from '../domain/observations.js'
 import {
+  isSameExternalOrigin,
   normalizeExternalTarget,
+  type ExternalOrigin,
   type NormalizedExternalTarget,
 } from '../domain/target.js'
 import {
@@ -67,6 +69,7 @@ export function createOutboundHttpCapability(
     ): Promise<ExternalRawObservation> {
       assertMethod(plan.method)
       const budgets = context.budgets
+      const effectiveMaxRequests = resolveEffectiveMaxRequests(budgets, context)
       const startedAt = nowMs()
       const deadlineAt = startedAt + budgets.overallDeadlineMs
 
@@ -83,7 +86,7 @@ export function createOutboundHttpCapability(
       for (;;) {
         assertWithinDeadline(deadlineAt, nowMs, context.signal)
 
-        if (requestsUsed >= budgets.maxRequests) {
+        if (requestsUsed >= effectiveMaxRequests) {
           throw new RequestBudgetExceededError()
         }
 
@@ -110,6 +113,7 @@ export function createOutboundHttpCapability(
           attemptOrder,
           approvedAddresses: authorized.approved,
           budgets,
+          effectiveMaxRequests,
           deadlineAt,
           nowMs,
           signal: context.signal,
@@ -126,6 +130,7 @@ export function createOutboundHttpCapability(
             method: plan.method,
             hops: Object.freeze([...hops]),
             redirects: Object.freeze([...redirects]),
+            requestsConsumed: requestsUsed,
           })
         }
 
@@ -146,6 +151,13 @@ export function createOutboundHttpCapability(
         }
 
         if (current.scheme === 'https' && next.scheme === 'http') {
+          throw new RedirectBlockedError()
+        }
+
+        if (
+          context.sameOriginRedirects !== undefined &&
+          !isSameOriginTarget(context.sameOriginRedirects, next)
+        ) {
           throw new RedirectBlockedError()
         }
 
@@ -244,6 +256,7 @@ async function attemptPinnedConnections(args: {
   attemptOrder: readonly string[]
   approvedAddresses: readonly string[]
   budgets: ExternalScanBudgets
+  effectiveMaxRequests: number
   deadlineAt: number
   nowMs: () => number
   signal: AbortSignal | undefined
@@ -258,7 +271,7 @@ async function attemptPinnedConnections(args: {
 
   for (const pinnedAddress of args.attemptOrder) {
     assertWithinDeadline(args.deadlineAt, args.nowMs, args.signal)
-    if (requestsUsed >= args.budgets.maxRequests) {
+    if (requestsUsed >= args.effectiveMaxRequests) {
       throw new RequestBudgetExceededError()
     }
 
@@ -322,6 +335,26 @@ async function attemptPinnedConnections(args: {
   }
 
   throw lastError ?? new ConnectionFailedError()
+}
+
+function resolveEffectiveMaxRequests(
+  budgets: ExternalScanBudgets,
+  context: ExternalRequestContext,
+): number {
+  if (context.maxRequestsOverride === undefined) return budgets.maxRequests
+  return Math.max(0, Math.min(budgets.maxRequests, context.maxRequestsOverride))
+}
+
+function isSameOriginTarget(
+  origin: ExternalOrigin,
+  target: NormalizedExternalTarget,
+): boolean {
+  return isSameExternalOrigin(origin, {
+    scheme: target.scheme,
+    hostname: target.hostname,
+    port: target.port,
+    origin: target.origin,
+  })
 }
 
 function resolvePlanTarget(

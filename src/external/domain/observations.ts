@@ -137,11 +137,35 @@ export type ExternalHttpResponseObservation = Readonly<{
   tls?: ExternalTlsObservation
 }>
 
+export type ExternalAssetSkipReason =
+  | 'off-origin'
+  | 'unsupported-scheme'
+  | 'credentials'
+  | 'unsupported-port'
+  | 'normalize-failed'
+  | 'budget'
+  | 'max-assets'
+  | 'redirect-left-origin'
+  | 'fetch-failed'
+  | 'oversized-html'
+  | 'not-html'
+  | 'duplicate'
+
 export type ExternalAssetObservation = Readonly<{
   sourceUrl: string
   requestUrl: string
   kind: 'script' | 'stylesheet'
   sameOrigin: boolean
+  fetched: boolean
+  statusCode?: number
+  contentType?: string
+  byteLength?: number
+  redirected?: boolean
+  skipReason?: ExternalAssetSkipReason
+  sourceMapReferenced?: boolean
+  /** Bounded external map URL reference; never inline data payload. */
+  sourceMapReference?: string
+  inlineSourceMap?: boolean
 }>
 
 /**
