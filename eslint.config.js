@@ -269,6 +269,59 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/external/rules/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'node:dns',
+              message: 'External rules cannot perform DNS.',
+            },
+            {
+              name: 'node:net',
+              message: 'External rules cannot open sockets.',
+            },
+            {
+              name: 'node:http',
+              message: 'External rules cannot perform HTTP.',
+            },
+            {
+              name: 'node:https',
+              message: 'External rules cannot perform HTTPS.',
+            },
+            {
+              name: 'node:tls',
+              message: 'External rules cannot use TLS I/O.',
+            },
+            {
+              name: 'node:fs',
+              message: 'External rules cannot access the filesystem.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/external/infra/**'],
+              message: 'External rules cannot import transport infrastructure.',
+            },
+            {
+              group: ['**/external/orchestration/**'],
+              message: 'External rules cannot import orchestration.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message: 'External rules cannot access the network.',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
