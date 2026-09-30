@@ -16,7 +16,11 @@ import {
   extractAssetReferences,
   extractSourceMapObservation,
 } from '../extractors/index.js'
-import { RedirectBlockedError, RequestBudgetExceededError } from '../infra/errors.js'
+import {
+  ExternalTransportError,
+  RedirectBlockedError,
+  RequestBudgetExceededError,
+} from '../infra/errors.js'
 import type { ExternalRawObservation, OutboundHttpCapability } from '../infra/types.js'
 
 export type AssetInventoryResult = Readonly<{
@@ -261,9 +265,10 @@ export async function inventorySameOriginAssets(args: {
           skipReason,
         }),
       )
-      if (remaining > 0) {
-        requestsConsumed += 1
-        remaining -= 1
+      const consumed = resolveFailedRequestConsumption(error, remaining)
+      if (consumed > 0) {
+        requestsConsumed += consumed
+        remaining = Math.max(0, remaining - consumed)
       }
     }
   }
@@ -394,4 +399,20 @@ function findHeader(
     if (header.name.toLowerCase() === lower) return header.value
   }
   return undefined
+}
+
+/**
+ * Account outbound attempts for a failed asset fetch.
+ * Prefer transport-reported consumption; otherwise charge one attempt (fail closed).
+ */
+function resolveFailedRequestConsumption(error: unknown, remaining: number): number {
+  if (remaining <= 0) return 0
+  if (
+    error instanceof ExternalTransportError &&
+    typeof error.requestsConsumed === 'number' &&
+    Number.isFinite(error.requestsConsumed)
+  ) {
+    return Math.max(0, Math.min(remaining, Math.trunc(error.requestsConsumed)))
+  }
+  return 1
 }

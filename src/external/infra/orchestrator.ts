@@ -23,6 +23,7 @@ import { EXTERNAL_MAX_ADDRESS_ATTEMPTS, REDIRECT_STATUS_CODES } from './constant
 import {
   BlockedDestinationError,
   ConnectionFailedError,
+  ConnectTimeoutError,
   DnsFailureError,
   HeaderTooLargeError,
   InvalidExternalMethodError,
@@ -87,7 +88,7 @@ export function createOutboundHttpCapability(
         assertWithinDeadline(deadlineAt, nowMs, context.signal)
 
         if (requestsUsed >= effectiveMaxRequests) {
-          throw new RequestBudgetExceededError()
+          throw new RequestBudgetExceededError(requestsUsed)
         }
 
         const authorized = await authorizeDestination(
@@ -104,7 +105,7 @@ export function createOutboundHttpCapability(
         )
 
         if (attemptOrder.length === 0) {
-          throw new BlockedDestinationError()
+          throw new BlockedDestinationError(requestsUsed)
         }
 
         const hop = await attemptPinnedConnections({
@@ -135,34 +136,37 @@ export function createOutboundHttpCapability(
         }
 
         if (redirectsUsed >= budgets.maxRedirects) {
-          throw new RedirectBudgetExceededError()
+          throw new RedirectBudgetExceededError(requestsUsed)
         }
 
         const location = findHeaderValue(hop.observation.headers, 'location')
         if (location === undefined || location.trim().length === 0) {
-          throw new RedirectBlockedError()
+          throw new RedirectBlockedError(requestsUsed)
         }
 
         let next: NormalizedExternalTarget
         try {
           next = normalizeRedirectTarget(current.requestUrl, location)
-        } catch {
-          throw new RedirectBlockedError()
+        } catch (error) {
+          if (error instanceof RedirectBlockedError) {
+            throw new RedirectBlockedError(requestsUsed)
+          }
+          throw new RedirectBlockedError(requestsUsed)
         }
 
         if (current.scheme === 'https' && next.scheme === 'http') {
-          throw new RedirectBlockedError()
+          throw new RedirectBlockedError(requestsUsed)
         }
 
         if (
           context.sameOriginRedirects !== undefined &&
           !isSameOriginTarget(context.sameOriginRedirects, next)
         ) {
-          throw new RedirectBlockedError()
+          throw new RedirectBlockedError(requestsUsed)
         }
 
         if (visited.has(next.requestUrl)) {
-          throw new RedirectLoopError()
+          throw new RedirectLoopError(requestsUsed)
         }
         visited.add(next.requestUrl)
 
@@ -172,7 +176,7 @@ export function createOutboundHttpCapability(
           staticDecision.kind === 'IP_DENIED' ||
           staticDecision.kind === 'INVALID'
         ) {
-          throw new RedirectBlockedError()
+          throw new RedirectBlockedError(requestsUsed)
         }
 
         redirects.push(
@@ -272,14 +276,14 @@ async function attemptPinnedConnections(args: {
   for (const pinnedAddress of args.attemptOrder) {
     assertWithinDeadline(args.deadlineAt, args.nowMs, args.signal)
     if (requestsUsed >= args.effectiveMaxRequests) {
-      throw new RequestBudgetExceededError()
+      throw new RequestBudgetExceededError(requestsUsed)
     }
 
     const remainingOverall = Math.max(0, args.deadlineAt - args.nowMs())
     const connectTimeoutMs = Math.min(args.budgets.connectTimeoutMs, remainingOverall)
     const responseTimeoutMs = Math.min(args.budgets.responseTimeoutMs, remainingOverall)
     if (connectTimeoutMs <= 0 || responseTimeoutMs <= 0) {
-      throw new OverallDeadlineExceededError()
+      throw new OverallDeadlineExceededError(requestsUsed)
     }
 
     requestsUsed += 1
@@ -314,7 +318,8 @@ async function attemptPinnedConnections(args: {
         }),
       }
     } catch (error) {
-      lastError = error instanceof Error ? error : new ConnectionFailedError()
+      lastError =
+        error instanceof Error ? error : new ConnectionFailedError(requestsUsed)
       if (
         error instanceof BlockedDestinationError ||
         error instanceof RequestBudgetExceededError ||
@@ -328,13 +333,59 @@ async function attemptPinnedConnections(args: {
         error instanceof ResponseTooLargeError ||
         error instanceof ResponseTimeoutError
       ) {
-        throw error
+        throw withRequestsConsumed(error, requestsUsed)
       }
       // Connection/connect-timeout: try next approved address if any remain.
     }
   }
 
-  throw lastError ?? new ConnectionFailedError()
+  throw lastError ?? new ConnectionFailedError(requestsUsed)
+}
+
+function withRequestsConsumed(error: Error, requestsConsumed: number): Error {
+  if (error instanceof RedirectBlockedError) {
+    return new RedirectBlockedError(requestsConsumed)
+  }
+  if (error instanceof RedirectLoopError) {
+    return new RedirectLoopError(requestsConsumed)
+  }
+  if (error instanceof RedirectBudgetExceededError) {
+    return new RedirectBudgetExceededError(requestsConsumed)
+  }
+  if (error instanceof RequestBudgetExceededError) {
+    return new RequestBudgetExceededError(requestsConsumed)
+  }
+  if (error instanceof BlockedDestinationError) {
+    return new BlockedDestinationError(requestsConsumed)
+  }
+  if (error instanceof RemoteAddressMismatchError) {
+    return new RemoteAddressMismatchError(requestsConsumed)
+  }
+  if (error instanceof TlsFailureError) {
+    return new TlsFailureError(requestsConsumed)
+  }
+  if (error instanceof HeaderTooLargeError) {
+    return new HeaderTooLargeError(requestsConsumed)
+  }
+  if (error instanceof ResponseTooLargeError) {
+    return new ResponseTooLargeError(requestsConsumed)
+  }
+  if (error instanceof ResponseTimeoutError) {
+    return new ResponseTimeoutError(requestsConsumed)
+  }
+  if (error instanceof OverallDeadlineExceededError) {
+    return new OverallDeadlineExceededError(requestsConsumed)
+  }
+  if (error instanceof DnsFailureError) {
+    return new DnsFailureError(requestsConsumed)
+  }
+  if (error instanceof ConnectionFailedError) {
+    return new ConnectionFailedError(requestsConsumed)
+  }
+  if (error instanceof ConnectTimeoutError) {
+    return new ConnectTimeoutError(requestsConsumed)
+  }
+  return error
 }
 
 function resolveEffectiveMaxRequests(
